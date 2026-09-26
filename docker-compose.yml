@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  backend:
+    build: ./server
+    container_name: gamestore-backend
+    restart: always
+    ports:
+      - "5000:5000"
+    env_file:
+      - ./server/.env
+    networks:
+      - gamestore-net
+
+  frontend:
+    build: ./client
+    container_name: gamestore-frontend
+    restart: always
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - gamestore-net
+
+networks:
+  gamestore-net:
+    driver: bridge
