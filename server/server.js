@@ -2,14 +2,21 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 const db = require('./db');
 const User = require('./models/User');
 const Game = require('./models/Game');
 const Order = require('./models/Order');
+const { verifyToken, verifyAdmin, JWT_SECRET } = require('./middlewares/auth');
 
 const app = express();
 app.use(express.json());
 app.use(cors());
+
+// Healthcheck endpoint cho Jenkins Pipeline kiểm tra
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'UP', timestamp: new Date() });
+});
 
 // ==================== AUTH ====================
 app.post('/api/auth/register', async (req, res) => {
@@ -20,7 +27,9 @@ app.post('/api/auth/register', async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
     const user = await User.create({ username, password: hashedPassword, name, email });
-    res.status(201).json({ message: 'Đăng ký thành công!', user });
+    const token = jwt.sign({ id: user.id, username: user.username, role: user.role }, JWT_SECRET, { expiresIn: '1d' });
+
+    res.status(201).json({ message: 'Đăng ký thành công!', user, token });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -35,8 +44,11 @@ app.post('/api/auth/login', async (req, res) => {
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return res.status(400).json({ message: 'Mật khẩu không chính xác!' });
 
+    const token = jwt.sign({ id: user.id, username: user.username, role: user.role }, JWT_SECRET, { expiresIn: '1d' });
+
     res.json({
       message: 'Đăng nhập thành công!',
+      token,
       user: { id: user.id, username: user.username, name: user.name, email: user.email, role: user.role, balance: user.balance }
     });
   } catch (err) {
@@ -44,10 +56,21 @@ app.post('/api/auth/login', async (req, res) => {
   }
 });
 
-app.post('/api/users/add-balance', async (req, res) => {
+app.get('/api/auth/me', verifyToken, async (req, res) => {
   try {
-    const { userId, amount } = req.body;
-    const result = await User.addBalance(userId, amount);
+    const user = await User.findById(req.user.id);
+    if (!user) return res.status(404).json({ message: 'Không tìm thấy người dùng!' });
+    res.json({ id: user.id, username: user.username, name: user.name, email: user.email, role: user.role, balance: user.balance });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+app.post('/api/users/add-balance', verifyToken, async (req, res) => {
+  try {
+    const { amount } = req.body;
+    if (!amount || amount <= 0) return res.status(400).json({ message: 'Số tiền không hợp lệ!' });
+    const result = await User.addBalance(req.user.id, Number(amount));
     res.json({ balance: result.balance });
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -64,7 +87,7 @@ app.get('/api/games', async (req, res) => {
   }
 });
 
-app.post('/api/games', async (req, res) => {
+app.post('/api/games', verifyAdmin, async (req, res) => {
   try {
     const game = await Game.create(req.body);
     res.status(201).json(game);
@@ -73,7 +96,7 @@ app.post('/api/games', async (req, res) => {
   }
 });
 
-app.patch('/api/games/:id/stock', async (req, res) => {
+app.patch('/api/games/:id/stock', verifyAdmin, async (req, res) => {
   try {
     const game = await Game.updateStock(req.params.id, req.body.quantity);
     res.json(game);
@@ -82,15 +105,18 @@ app.patch('/api/games/:id/stock', async (req, res) => {
   }
 });
 
-// ==================== THANH TOÁN & THỐNG KÊ ====================
-app.post('/api/orders/checkout', async (req, res) => {
+// ==================== ORDERS & CHECKOUT ====================
+app.post('/api/orders/checkout', verifyToken, async (req, res) => {
   const conn = await db.getConnection();
   try {
     await conn.beginTransaction();
-    const { userId, cart } = req.body;
+    const userId = req.user.id;
+    const { cart } = req.body;
+
+    if (!cart || cart.length === 0) throw new Error('Giỏ hàng trống!');
 
     const [userRows] = await conn.query('SELECT * FROM users WHERE id = ? FOR UPDATE', [userId]);
-    if (userRows.length === 0) throw new Error('Không tìm thấy người dùng!');
+    if (userRows.length === 0) throw new Error('Người dùng không hợp lệ!');
     const user = userRows[0];
 
     const totalAmount = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
@@ -98,7 +124,6 @@ app.post('/api/orders/checkout', async (req, res) => {
       throw new Error('Số dư ví không đủ để thanh toán!');
     }
 
-    // Giảm số lượng tồn kho và tăng số lượng bán
     for (const item of cart) {
       const [gameRows] = await conn.query('SELECT stock FROM games WHERE id = ? FOR UPDATE', [item.id]);
       if (gameRows.length === 0 || gameRows[0].stock < item.quantity) {
@@ -107,10 +132,8 @@ app.post('/api/orders/checkout', async (req, res) => {
       await conn.query('UPDATE games SET stock = stock - ?, sold = sold + ? WHERE id = ?', [item.quantity, item.quantity, item.id]);
     }
 
-    // Trừ số dư người dùng
     await conn.query('UPDATE users SET balance = balance - ? WHERE id = ?', [totalAmount, userId]);
 
-    // Tạo đơn hàng lưu lại thống kê
     const orderId = 'ORD-' + Date.now().toString().slice(-6);
     const dateStr = new Date().toLocaleString('vi-VN');
     await conn.query(
@@ -118,7 +141,6 @@ app.post('/api/orders/checkout', async (req, res) => {
       [orderId, user.id, user.name, totalAmount, dateStr]
     );
 
-    // Sinh key game
     const generatedKeys = [];
     for (const item of cart) {
       for (let i = 0; i < item.quantity; i++) {
@@ -143,25 +165,22 @@ app.post('/api/orders/checkout', async (req, res) => {
   }
 });
 
-app.get('/api/orders/user/:userId', async (req, res) => {
+app.get('/api/orders/my-orders', verifyToken, async (req, res) => {
   try {
-    const orders = await Order.getByUserId(req.params.userId);
+    const orders = await Order.getByUserId(req.user.id);
     res.json(orders);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 });
 
-// Thống kê doanh thu, số lượng bán trả về cho Admin
-app.get('/api/admin/dashboard', async (req, res) => {
+app.get('/api/admin/dashboard', verifyAdmin, async (req, res) => {
   try {
     const games = await Game.getAll();
     const orders = await Order.getAll();
-
     const totalRevenue = orders.reduce((sum, o) => sum + Number(o.totalAmount), 0);
     const totalSoldUnits = games.reduce((sum, g) => sum + Number(g.sold), 0);
     const totalInStock = games.reduce((sum, g) => sum + Number(g.stock), 0);
-
     res.json({
       stats: { totalRevenue, totalSoldUnits, totalInStock, orderCount: orders.length },
       games,
@@ -173,4 +192,7 @@ app.get('/api/admin/dashboard', async (req, res) => {
 });
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`>>> Backend Server MySQL dang chay tai port ${PORT}`));
+if (process.env.NODE_ENV !== 'test') {
+  app.listen(PORT, () => console.log(`>>> Backend Server đang chạy tại port ${PORT}`));
+}
+module.exports = app;
