@@ -4,7 +4,6 @@ pipeline {
     environment {
         // Tự động nhận diện docker compose (V2) hoặc docker-compose (V1)
         DOCKER_COMPOSE = 'docker compose'
-        NODE_ENV = 'production'
         PATH = "/usr/local/bin:/usr/bin:/bin:$PATH"
     }
 
@@ -18,7 +17,7 @@ pipeline {
 
         stage('2. Install Dependencies') {
             steps {
-                echo '>>> [CI] 2. Kiem tra Node/NPM & Cai dat dependencies...'
+                echo '>>> [CI] 2. Kiem tra Node/NPM & Cai dat day du dependencies...'
                 sh '''
                     node -v
                     npm -v
@@ -27,7 +26,8 @@ pipeline {
                     sh 'npm install'
                 }
                 dir('client') {
-                    sh 'npm install'
+                    // Bat buoc cai ca devDependencies de co lenh vite build
+                    sh 'npm install --include=dev'
                 }
             }
         }
