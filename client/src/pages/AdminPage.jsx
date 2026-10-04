@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { useShop } from '../context/ShopContext';
-import { ShieldCheck, PackagePlus, DollarSign, ShoppingCart, Layers, TrendingUp } from 'lucide-react';
+import { ShieldCheck, PackagePlus, DollarSign, ShoppingCart, Layers, TrendingUp, PackageX } from 'lucide-react';
 
 export default function AdminPage() {
-  const { games, orders, addStock, addNewGame, currentUser } = useShop();
+  const { games = [], orders = [], addStock, addNewGame, currentUser } = useShop();
 
   const [stockInputs, setStockInputs] = useState({});
   const [newGameForm, setNewGameForm] = useState({
@@ -15,6 +15,9 @@ export default function AdminPage() {
     description: ''
   });
 
+  const safeGames = Array.isArray(games) ? games : [];
+  const safeOrders = Array.isArray(orders) ? orders : [];
+
   if (!currentUser || currentUser.role !== 'admin') {
     return (
       <div className="text-center py-16 text-rose-400 font-bold">
@@ -23,10 +26,10 @@ export default function AdminPage() {
     );
   }
 
-  // Thống kê tổng hợp
-  const totalRevenue = orders.reduce((sum, o) => sum + o.totalAmount, 0);
-  const totalSoldUnits = games.reduce((sum, g) => sum + g.sold, 0);
-  const totalInStock = games.reduce((sum, g) => sum + g.stock, 0);
+  // Thống kê tổng hợp an toàn
+  const totalRevenue = safeOrders.reduce((sum, o) => sum + Number(o?.totalAmount || 0), 0);
+  const totalSoldUnits = safeGames.reduce((sum, g) => sum + Number(g?.sold || 0), 0);
+  const totalInStock = safeGames.reduce((sum, g) => sum + Number(g?.stock || 0), 0);
 
   const handleStockChange = (id, val) => {
     setStockInputs({ ...stockInputs, [id]: val });
@@ -56,6 +59,7 @@ export default function AdminPage() {
 
   return (
     <div className="space-y-8">
+      {/* Tiêu đề trang quản trị */}
       <div className="flex items-center gap-3 border-b border-slate-800 pb-4">
         <div className="p-2 rounded-xl bg-fuchsia-600/20 text-fuchsia-400 border border-fuchsia-500/30">
           <ShieldCheck className="w-6 h-6" />
@@ -84,7 +88,7 @@ export default function AdminPage() {
           </div>
           <div>
             <div className="text-xs text-slate-400">Số đơn hoàn tất</div>
-            <div className="text-xl font-bold text-white">{orders.length} đơn</div>
+            <div className="text-xl font-bold text-white">{safeOrders.length} đơn</div>
           </div>
         </div>
 
@@ -128,17 +132,17 @@ export default function AdminPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-800">
-                {games.map(game => (
+                {safeGames.map(game => (
                   <tr key={game.id} className="hover:bg-slate-800/30 transition">
                     <td className="py-3 px-3 font-medium text-slate-200 flex items-center gap-2">
                       <img src={game.image} alt="" className="w-8 h-8 rounded object-cover" />
                       <span className="truncate max-w-[160px]">{game.title}</span>
                     </td>
-                    <td className="py-3 px-2 text-cyan-400 font-semibold">{game.price.toLocaleString('vi-VN')}₫</td>
-                    <td className="py-3 px-2 text-emerald-400 font-bold">{game.sold}</td>
+                    <td className="py-3 px-2 text-cyan-400 font-semibold">{Number(game.price || 0).toLocaleString('vi-VN')}₫</td>
+                    <td className="py-3 px-2 text-emerald-400 font-bold">{game.sold || 0}</td>
                     <td className="py-3 px-2">
-                      <span className={`px-2 py-0.5 rounded font-bold ${game.stock > 5 ? 'bg-slate-800 text-slate-300' : 'bg-rose-500/20 text-rose-400'}`}>
-                        {game.stock}
+                      <span className={`px-2 py-0.5 rounded font-bold ${Number(game.stock) > 5 ? 'bg-slate-800 text-slate-300' : 'bg-rose-500/20 text-rose-400'}`}>
+                        {game.stock || 0}
                       </span>
                     </td>
                     <td className="py-3 px-3 text-right">
@@ -245,24 +249,37 @@ export default function AdminPage() {
       {/* Lịch sử tất cả đơn hàng đã phát sinh */}
       <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6">
         <h3 className="text-lg font-bold text-white mb-4">Lịch Sử Mua Hàng Toàn Hệ Thống</h3>
-        {orders.length === 0 ? (
-          <p className="text-xs text-slate-500">Chưa có giao dịch mua hàng nào được ghi nhận.</p>
+        {safeOrders.length === 0 ? (
+          <div className="text-center py-8 text-slate-500 flex flex-col items-center gap-2">
+            <PackageX className="w-8 h-8 text-slate-600" />
+            <p className="text-xs">Chưa có giao dịch mua hàng nào được ghi nhận.</p>
+          </div>
         ) : (
           <div className="space-y-3">
-            {orders.map(o => (
-              <div key={o.orderId} className="bg-slate-800/50 p-3 rounded-xl border border-slate-700/60 flex flex-wrap justify-between items-center text-xs">
-                <div>
-                  <span className="font-bold text-cyan-400">{o.orderId}</span> - Người mua: <span className="text-slate-200 font-semibold">{o.userName}</span>
-                  <div className="text-[11px] text-slate-400 mt-0.5">
-                    Gồm: {o.items.map(i => `${i.title} (x${i.quantity})`).join(', ')}
+            {safeOrders.map(o => {
+              // Phòng vệ an toàn nếu o.items hoặc o.keys không tồn tại
+              let orderItemsText = 'Chi tiết đơn hàng';
+              if (Array.isArray(o.items) && o.items.length > 0) {
+                orderItemsText = o.items.map(i => `${i.title} (x${i.quantity})`).join(', ');
+              } else if (Array.isArray(o.keys) && o.keys.length > 0) {
+                orderItemsText = o.keys.map(k => k.title).join(', ');
+              }
+
+              return (
+                <div key={o.orderId || Math.random()} className="bg-slate-800/50 p-3 rounded-xl border border-slate-700/60 flex flex-wrap justify-between items-center text-xs gap-2">
+                  <div>
+                    <span className="font-bold text-cyan-400">{o.orderId}</span> - Người mua: <span className="text-slate-200 font-semibold">{o.userName || 'Khách'}</span>
+                    <div className="text-[11px] text-slate-400 mt-0.5">
+                      Gồm: {orderItemsText}
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-emerald-400 font-bold">{Number(o.totalAmount || 0).toLocaleString('vi-VN')}₫</div>
+                    <div className="text-[10px] text-slate-500">{o.date}</div>
                   </div>
                 </div>
-                <div className="text-right">
-                  <div className="text-emerald-400 font-bold">{o.totalAmount.toLocaleString('vi-VN')}₫</div>
-                  <div className="text-[10px] text-slate-500">{o.date}</div>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>

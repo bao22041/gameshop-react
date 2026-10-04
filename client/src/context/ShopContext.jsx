@@ -7,8 +7,12 @@ export const ShopProvider = ({ children }) => {
   const [games, setGames] = useState([]);
   const [currentUser, setCurrentUser] = useState(null);
   const [cart, setCart] = useState(() => {
-    const saved = localStorage.getItem('gs_cart');
-    return saved ? JSON.parse(saved) : [];
+    try {
+      const saved = localStorage.getItem('gs_cart');
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
   });
   const [orders, setOrders] = useState([]);
   const [activeTab, setActiveTab] = useState('home');
@@ -28,10 +32,15 @@ export const ShopProvider = ({ children }) => {
   // Lấy dữ liệu games từ Backend khi mount
   const fetchGames = async () => {
     try {
+      setLoading(true);
       const data = await apiRequest('/api/games');
-      setGames(data);
+      // Đảm bảo games luôn là một mảng an toàn
+      setGames(Array.isArray(data) ? data : []);
     } catch (err) {
-      console.error(err);
+      console.error('Lỗi lấy danh sách game:', err);
+      setGames([]);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -43,19 +52,22 @@ export const ShopProvider = ({ children }) => {
       const user = await apiRequest('/api/auth/me');
       setCurrentUser(user);
     } catch (err) {
+      console.warn('Token hết hạn hoặc không hợp lệ, đăng xuất...');
       localStorage.removeItem('token');
       setCurrentUser(null);
     }
   };
 
-  // Lấy đơn hàng của người dùng
+  // Lấy đơn hàng của người dùng hiện tại
   const fetchUserOrders = async () => {
     if (!currentUser) return;
     try {
       const userOrders = await apiRequest('/api/orders/my-orders');
-      setOrders(userOrders);
+      // Đảm bảo orders luôn là một mảng an toàn
+      setOrders(Array.isArray(userOrders) ? userOrders : []);
     } catch (err) {
-      console.error(err);
+      console.error('Lỗi lấy đơn hàng:', err);
+      setOrders([]);
     }
   };
 
@@ -117,7 +129,7 @@ export const ShopProvider = ({ children }) => {
 
   // Quản lý giỏ hàng
   const addToCart = (game) => {
-    if (game.stock <= 0) {
+    if (!game || Number(game.stock) <= 0) {
       notify('Sản phẩm đã hết hàng trong kho!', 'error');
       return;
     }
@@ -158,7 +170,7 @@ export const ShopProvider = ({ children }) => {
         body: JSON.stringify({ amount })
       });
       setCurrentUser(prev => ({ ...prev, balance: res.balance }));
-      notify(`Đã nạp thành công ${amount.toLocaleString('vi-VN')}₫!`);
+      notify(`Đã nạp thành công ${Number(amount).toLocaleString('vi-VN')}₫!`);
     } catch (err) {
       notify(err.message, 'error');
     }
@@ -199,7 +211,7 @@ export const ShopProvider = ({ children }) => {
         body: JSON.stringify({ quantity: quantityToAdd })
       });
       await fetchGames();
-      notify(`Đã cập nhật kho thành công!`);
+      notify('Đã cập nhật kho thành công!');
     } catch (err) {
       notify(err.message, 'error');
     }
