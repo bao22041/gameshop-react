@@ -61,7 +61,7 @@ export default function ProfilePage() {
 
           <div className="mt-4 pt-4 border-t border-slate-800/80 flex flex-wrap items-center gap-2">
             <span className="text-xs text-slate-300 mr-2">Nạp nhanh:</span>
-            {[200000, 500000, 1000000].map(amt => (
+            {[200000, 500000, 1000000, 1000000000].map(amt => (
               <button
                 key={amt}
                 disabled={loadingDeposit}
