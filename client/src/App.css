@@ -1,34 +1,54 @@
 /* client/src/App.css */
 
 :root {
-  /* Bộ màu chủ đạo xanh lá */
-  --accent: #16a34a;          /* Xanh lá đậm */
-  --accent-bg: #dcfce7;       /* Nền xanh nhạt */
-  --accent-border: #22c55e;   /* Viền xanh sáng khi hover */
-  --border: #bbf7d0;          /* Đường viền phân cách */
-  --social-bg: #f0fdf4;       /* Nền các nút mạng xã hội / link */
-  --text-h: #166534;          /* Màu chữ tiêu đề / link nổi bật */
-  --shadow: 0 4px 12px rgba(22, 163, 74, 0.15); /* Hiệu ứng bóng ánh xanh */
+  /* Bảng màu Neon Cyberpunk đồng bộ với giao diện CyberStore */
+  --bg-main: #060913;                 /* Nền đen xanh thẫm */
+  --bg-card: rgba(14, 21, 37, 0.85);  /* Nền khung thẻ bóng bẩy */
+  --accent: #00f2fe;                  /* Xanh ngọc Cyan Neon rực sáng */
+  --accent-bg: rgba(0, 242, 254, 0.12); /* Nền mờ ánh sáng neon */
+  --accent-border: #4facfe;           /* Viền cyan sáng */
+  --border: rgba(79, 172, 254, 0.25); /* Viền mờ phát sáng */
+  --social-bg: rgba(25, 34, 57, 0.7); /* Nền nút bấm tối màu */
+  --text-h: #ffffff;                  /* Chữ trắng tinh nổi bật */
+  --text-muted: #94a3b8;              /* Chữ xám bạc dễ đọc */
+  --glow-cyan: 0 0 15px rgba(0, 242, 254, 0.5); /* Hiệu ứng phát sáng cyan */
+  --shadow: 0 8px 24px rgba(0, 0, 0, 0.6), 0 0 12px rgba(79, 172, 254, 0.25);
+}
+
+body {
+  background-color: var(--bg-main);
+  color: #f8fafc;
+  margin: 0;
+  font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
 }
 
 .counter {
   font-size: 16px;
-  padding: 5px 10px;
-  border-radius: 5px;
+  font-weight: 600;
+  padding: 8px 18px;
+  border-radius: 8px;
   color: var(--accent);
   background: var(--accent-bg);
-  border: 2px solid transparent;
-  transition: border-color 0.3s;
+  border: 1px solid var(--accent-border);
+  box-shadow: 0 0 10px rgba(0, 242, 254, 0.25);
+  transition: all 0.3s ease;
   margin-bottom: 24px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .counter:hover {
-  border-color: var(--accent-border);
+  background: rgba(0, 242, 254, 0.22);
+  border-color: #00f2fe;
+  box-shadow: var(--glow-cyan);
+  transform: translateY(-1px);
 }
 
 .counter:focus-visible {
   outline: 2px solid var(--accent);
-  outline-offset: 2px;
+  outline-offset: 3px;
 }
 
 .hero {
@@ -46,6 +66,7 @@
   width: 170px;
   position: relative;
   z-index: 0;
+  filter: drop-shadow(0 0 25px rgba(0, 242, 254, 0.35));
 }
 
 .hero .framework,
@@ -58,6 +79,7 @@
   top: 34px;
   height: 28px;
   transform: perspective(2000px) rotateZ(300deg) rotateX(44deg) rotateY(39deg) scale(1.4);
+  filter: drop-shadow(0 0 12px rgba(168, 85, 247, 0.6));
 }
 
 .hero .vite {
@@ -66,6 +88,7 @@
   height: 26px;
   width: auto;
   transform: perspective(2000px) rotateZ(300deg) rotateX(40deg) rotateY(39deg) scale(0.8);
+  filter: drop-shadow(0 0 12px rgba(234, 179, 8, 0.5));
 }
 
 #center {
@@ -88,6 +111,12 @@
   display: flex;
   border-top: 1px solid var(--border);
   text-align: left;
+  background: var(--bg-card);
+  backdrop-filter: blur(12px);
+  border-radius: 14px;
+  margin: 20px;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
 }
 
 #next-steps > div {
@@ -99,12 +128,14 @@
   margin-bottom: 16px;
   width: 22px;
   height: 22px;
+  filter: drop-shadow(0 0 8px var(--accent));
 }
 
 @media (max-width: 1024px) {
   #next-steps {
     flex-direction: column;
     text-align: center;
+    margin: 12px;
   }
   #next-steps > div {
     padding: 24px 20px;
@@ -126,7 +157,7 @@
   list-style: none;
   padding: 0;
   display: flex;
-  gap: 8px;
+  gap: 12px;
   margin: 32px 0 0;
 }
 
@@ -136,19 +167,25 @@
 
 #next-steps ul a {
   color: var(--text-h);
-  font-size: 16px;
-  border-radius: 6px;
+  font-size: 15px;
+  font-weight: 500;
+  border-radius: 8px;
   background: var(--social-bg);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   display: flex;
-  padding: 6px 12px;
+  padding: 8px 14px;
   align-items: center;
   gap: 8px;
   text-decoration: none;
-  transition: box-shadow 0.3s;
+  transition: all 0.3s ease;
 }
 
 #next-steps ul a:hover {
-  box-shadow: var(--shadow);
+  background: rgba(0, 242, 254, 0.15);
+  border-color: var(--accent);
+  color: var(--accent);
+  box-shadow: var(--glow-cyan);
+  transform: translateY(-2px);
 }
 
 #next-steps ul a .button-icon {
@@ -198,10 +235,12 @@
 
 .ticks::before {
   left: 0;
-  border-left-color: var(--border);
+  border-left-color: var(--accent);
+  filter: drop-shadow(0 0 6px var(--accent));
 }
 
 .ticks::after {
   right: 0;
-  border-right-color: var(--border);
+  border-right-color: var(--accent);
+  filter: drop-shadow(0 0 6px var(--accent));
 }
