@@ -7,10 +7,8 @@ export default function HomePage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
 
-  // Đảm bảo games luôn là một mảng an toàn
   const safeGames = Array.isArray(games) ? games : [];
 
-  // Trích xuất danh mục an toàn, tránh crash khi category undefined hoặc rỗng
   const categories = [
     'All',
     ...new Set(

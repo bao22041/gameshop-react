@@ -12,7 +12,7 @@ function AppContent() {
   const { activeTab, notification } = useShop();
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-cyan-500 selection:text-white">
+    <div className="min-h-screen bg-emerald-700 text-white">
       {/* Toast Notification */}
       {notification && (
         <div className={`fixed top-4 right-4 z-50 px-4 py-2.5 rounded-xl shadow-2xl text-xs font-bold transition-all transform animate-bounce ${
