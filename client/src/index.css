@@ -1,3 +1,12 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+:root {
+  /* Tone xanh lá hiện đại */
+  --accent: #16a34a;          /* Xanh lá đậm cho text/icon/outline */
+  --accent-bg: #dcfce7;       /* Nền xanh nhạt cho button counter */
+  --accent-border: #22c55e;   /* Viền khi hover */
+  --border: #bbf7d0;          /* Đường kẻ viền xanh nhạt */
+  --social-bg: #f0fdf4;       /* Nền các nút liên kết */
+  --shadow: 0 4px 12px rgba(22, 163, 74, 0.15); /* Đổ bóng ánh xanh */
+}
