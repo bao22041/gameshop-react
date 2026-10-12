@@ -1,24 +1,27 @@
 /* client/src/App.css */
 
 :root {
-  /* Bảng màu Neon Cyberpunk đồng bộ với giao diện CyberStore */
-  --bg-main: #060913;                 /* Nền đen xanh thẫm */
-  --bg-card: rgba(14, 21, 37, 0.85);  /* Nền khung thẻ bóng bẩy */
-  --accent: #00f2fe;                  /* Xanh ngọc Cyan Neon rực sáng */
-  --accent-bg: rgba(0, 242, 254, 0.12); /* Nền mờ ánh sáng neon */
-  --accent-border: #4facfe;           /* Viền cyan sáng */
-  --border: rgba(79, 172, 254, 0.25); /* Viền mờ phát sáng */
-  --social-bg: rgba(25, 34, 57, 0.7); /* Nền nút bấm tối màu */
-  --text-h: #ffffff;                  /* Chữ trắng tinh nổi bật */
-  --text-muted: #94a3b8;              /* Chữ xám bạc dễ đọc */
-  --glow-cyan: 0 0 15px rgba(0, 242, 254, 0.5); /* Hiệu ứng phát sáng cyan */
-  --shadow: 0 8px 24px rgba(0, 0, 0, 0.6), 0 0 12px rgba(79, 172, 254, 0.25);
+  /* Tone màu nền xanh lá đậm (Emerald / Cyber-Green) */
+  --bg-main: #06150d;                  /* Nền xanh đen lá đậm */
+  --bg-card: rgba(10, 36, 21, 0.85);   /* Nền card xanh rêu bóng bẩy */
+  --accent: #22c55e;                   /* Xanh lá neon sáng (Green-500) */
+  --accent-light: #4ade80;             /* Xanh lá tươi rực sáng (Green-400) */
+  --accent-bg: rgba(34, 197, 94, 0.15); /* Nền mờ ánh xanh lá neon */
+  --accent-border: #16a34a;            /* Viền xanh lá */
+  --border: rgba(74, 222, 128, 0.28);  /* Đường viền phát sáng nhẹ */
+  --social-bg: rgba(15, 48, 29, 0.85); /* Nền nút mạng xã hội */
+  --text-h: #f0fdf4;                   /* Chữ trắng ánh xanh */
+  --text-muted: #86efac;               /* Chữ phụ xanh ngọc nhạt */
+  --glow-green: 0 0 16px rgba(34, 197, 94, 0.6); /* Hiệu ứng tỏa sáng Neon xanh */
+  --shadow: 0 8px 24px rgba(0, 0, 0, 0.65), 0 0 15px rgba(34, 197, 94, 0.2);
 }
 
 body {
   background-color: var(--bg-main);
-  color: #f8fafc;
+  background-image: radial-gradient(circle at 50% 0%, rgba(34, 197, 94, 0.15) 0%, transparent 70%);
+  color: #f0fdf4;
   margin: 0;
+  min-height: 100vh;
   font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
 }
 
@@ -27,10 +30,10 @@ body {
   font-weight: 600;
   padding: 8px 18px;
   border-radius: 8px;
-  color: var(--accent);
+  color: var(--accent-light);
   background: var(--accent-bg);
-  border: 1px solid var(--accent-border);
-  box-shadow: 0 0 10px rgba(0, 242, 254, 0.25);
+  border: 1px solid var(--accent);
+  box-shadow: 0 0 10px rgba(34, 197, 94, 0.25);
   transition: all 0.3s ease;
   margin-bottom: 24px;
   cursor: pointer;
@@ -40,14 +43,14 @@ body {
 }
 
 .counter:hover {
-  background: rgba(0, 242, 254, 0.22);
-  border-color: #00f2fe;
-  box-shadow: var(--glow-cyan);
-  transform: translateY(-1px);
+  background: rgba(34, 197, 94, 0.28);
+  border-color: var(--accent-light);
+  box-shadow: var(--glow-green);
+  transform: translateY(-2px);
 }
 
 .counter:focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 2px solid var(--accent-light);
   outline-offset: 3px;
 }
 
@@ -66,7 +69,7 @@ body {
   width: 170px;
   position: relative;
   z-index: 0;
-  filter: drop-shadow(0 0 25px rgba(0, 242, 254, 0.35));
+  filter: drop-shadow(0 0 25px rgba(34, 197, 94, 0.45));
 }
 
 .hero .framework,
@@ -79,7 +82,7 @@ body {
   top: 34px;
   height: 28px;
   transform: perspective(2000px) rotateZ(300deg) rotateX(44deg) rotateY(39deg) scale(1.4);
-  filter: drop-shadow(0 0 12px rgba(168, 85, 247, 0.6));
+  filter: drop-shadow(0 0 12px rgba(74, 222, 128, 0.6));
 }
 
 .hero .vite {
@@ -88,7 +91,7 @@ body {
   height: 26px;
   width: auto;
   transform: perspective(2000px) rotateZ(300deg) rotateX(40deg) rotateY(39deg) scale(0.8);
-  filter: drop-shadow(0 0 12px rgba(234, 179, 8, 0.5));
+  filter: drop-shadow(0 0 12px rgba(250, 204, 21, 0.5));
 }
 
 #center {
@@ -112,7 +115,7 @@ body {
   border-top: 1px solid var(--border);
   text-align: left;
   background: var(--bg-card);
-  backdrop-filter: blur(12px);
+  backdrop-filter: blur(14px);
   border-radius: 14px;
   margin: 20px;
   border: 1px solid var(--border);
@@ -128,7 +131,7 @@ body {
   margin-bottom: 16px;
   width: 22px;
   height: 22px;
-  filter: drop-shadow(0 0 8px var(--accent));
+  filter: drop-shadow(0 0 8px var(--accent-light));
 }
 
 @media (max-width: 1024px) {
@@ -171,7 +174,7 @@ body {
   font-weight: 500;
   border-radius: 8px;
   background: var(--social-bg);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(74, 222, 128, 0.2);
   display: flex;
   padding: 8px 14px;
   align-items: center;
@@ -181,10 +184,10 @@ body {
 }
 
 #next-steps ul a:hover {
-  background: rgba(0, 242, 254, 0.15);
-  border-color: var(--accent);
-  color: var(--accent);
-  box-shadow: var(--glow-cyan);
+  background: rgba(34, 197, 94, 0.2);
+  border-color: var(--accent-light);
+  color: var(--accent-light);
+  box-shadow: var(--glow-green);
   transform: translateY(-2px);
 }
 
@@ -235,12 +238,12 @@ body {
 
 .ticks::before {
   left: 0;
-  border-left-color: var(--accent);
-  filter: drop-shadow(0 0 6px var(--accent));
+  border-left-color: var(--accent-light);
+  filter: drop-shadow(0 0 6px var(--accent-light));
 }
 
 .ticks::after {
   right: 0;
-  border-right-color: var(--accent);
-  filter: drop-shadow(0 0 6px var(--accent));
+  border-right-color: var(--accent-light);
+  filter: drop-shadow(0 0 6px var(--accent-light));
 }
