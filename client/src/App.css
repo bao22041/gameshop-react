@@ -1,21 +1,33 @@
 /* client/src/App.css */
+
+:root {
+  /* Bộ màu chủ đạo xanh lá */
+  --accent: #16a34a;          /* Xanh lá đậm */
+  --accent-bg: #dcfce7;       /* Nền xanh nhạt */
+  --accent-border: #22c55e;   /* Viền xanh sáng khi hover */
+  --border: #bbf7d0;          /* Đường viền phân cách */
+  --social-bg: #f0fdf4;       /* Nền các nút mạng xã hội / link */
+  --text-h: #166534;          /* Màu chữ tiêu đề / link nổi bật */
+  --shadow: 0 4px 12px rgba(22, 163, 74, 0.15); /* Hiệu ứng bóng ánh xanh */
+}
+
 .counter {
   font-size: 16px;
   padding: 5px 10px;
   border-radius: 5px;
-  color: #15803d;
-  background: #dcfce7;
+  color: var(--accent);
+  background: var(--accent-bg);
   border: 2px solid transparent;
   transition: border-color 0.3s;
   margin-bottom: 24px;
 }
 
 .counter:hover {
-  border-color: #22c55e;
+  border-color: var(--accent-border);
 }
 
 .counter:focus-visible {
-  outline: 2px solid #16a34a;
+  outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
 
@@ -74,7 +86,7 @@
 
 #next-steps {
   display: flex;
-  border-top: 1px solid #bbf7d0;
+  border-top: 1px solid var(--border);
   text-align: left;
 }
 
@@ -100,13 +112,13 @@
 }
 
 #docs {
-  border-right: 1px solid #bbf7d0;
+  border-right: 1px solid var(--border);
 }
 
 @media (max-width: 1024px) {
   #docs {
     border-right: none;
-    border-bottom: 1px solid #bbf7d0;
+    border-bottom: 1px solid var(--border);
   }
 }
 
@@ -123,10 +135,10 @@
 }
 
 #next-steps ul a {
-  color: #166534;
+  color: var(--text-h);
   font-size: 16px;
   border-radius: 6px;
-  background: #f0fdf4;
+  background: var(--social-bg);
   display: flex;
   padding: 6px 12px;
   align-items: center;
@@ -136,7 +148,7 @@
 }
 
 #next-steps ul a:hover {
-  box-shadow: 0 4px 12px rgba(22, 163, 74, 0.15);
+  box-shadow: var(--shadow);
 }
 
 #next-steps ul a .button-icon {
@@ -162,7 +174,7 @@
 
 #spacer {
   height: 88px;
-  border-top: 1px solid #bbf7d0;
+  border-top: 1px solid var(--border);
 }
 
 @media (max-width: 1024px) {
@@ -186,10 +198,10 @@
 
 .ticks::before {
   left: 0;
-  border-left-color: #22c55e;
+  border-left-color: var(--border);
 }
 
 .ticks::after {
   right: 0;
-  border-right-color: #22c55e;
+  border-right-color: var(--border);
 }
